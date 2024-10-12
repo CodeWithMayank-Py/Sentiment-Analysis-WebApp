@@ -1,0 +1,5 @@
+# Ignore all files in the build directory
+venv/
+
+# Ignore all files in the .env file
+.env
