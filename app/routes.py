@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request
 import requests
-import json
-from config import API_KEY, NLP_ENDPOINT
+import os
 
 main = Blueprint('main', __name__)
 
@@ -28,9 +27,11 @@ def analyze_sentiment(text):
     Returns:
         dict: A dictionary containing the sentiment score and confidence score.
     """
+    api_key = os.getenv('API_KEY')  # Load API key from .env
+    nlp_endpoint = os.getenv('NLP_ENDPOINT')  # Load endpoint from .env
+
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {API_KEY}'  # Note: This could be incorrect, see note below
     }
 
     data = {
@@ -41,7 +42,8 @@ def analyze_sentiment(text):
         'encodingType': 'UTF8'
     }
 
-    response = requests.post(NLP_ENDPOINT, headers=headers, json=data)
+    # Make a POST request to the Google NLP API
+    response = requests.post(f"{nlp_endpoint}?key={api_key}", headers=headers, json=data)
 
     if response.status_code == 200:
         sentiment = response.json()['documentSentiment']
@@ -50,4 +52,4 @@ def analyze_sentiment(text):
             'confidence': sentiment['score']  # Score represents positive/negative sentiment
         }
     else:
-        return {'error': 'Error analyzing sentiment'}
+        return {'error': f"Error: {response.status_code}, {response.text}"}
